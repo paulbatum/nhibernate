@@ -213,7 +213,7 @@ namespace NHibernate.Engine
 
 		int DontFlushFromFind { get; }
 
-		ConnectionManager ConnectionManager { get; }
+		ConnectionManager ConnectionManager { get; set; }
 
 		bool IsEventSource { get; }
 

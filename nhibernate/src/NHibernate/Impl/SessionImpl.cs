@@ -61,7 +61,7 @@ namespace NHibernate.Impl
 		[NonSerialized]
 		private readonly ActionQueue actionQueue;
 
-		private readonly ConnectionManager connectionManager;
+		private ConnectionManager connectionManager;
 
 		[NonSerialized]
 		private int dontFlushFromFind;
@@ -2256,6 +2256,7 @@ namespace NHibernate.Impl
 		public override ConnectionManager ConnectionManager
 		{
 			get { return connectionManager; }
+			set { connectionManager = value; }
 		}
 
 		public IMultiQuery CreateMultiQuery()

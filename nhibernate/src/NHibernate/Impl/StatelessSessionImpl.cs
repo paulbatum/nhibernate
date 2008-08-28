@@ -27,7 +27,7 @@ namespace NHibernate.Impl
 	{
 		private static readonly ILog log = LogManager.GetLogger(typeof(StatelessSessionImpl));
 		[NonSerialized]
-		private readonly ConnectionManager connectionManager;
+		private ConnectionManager connectionManager;
 		[NonSerialized]
 		private readonly StatefulPersistenceContext temporaryPersistenceContext;
 
@@ -389,6 +389,7 @@ namespace NHibernate.Impl
 		public override ConnectionManager ConnectionManager
 		{
 			get { return connectionManager; }
+			set { connectionManager = value; }
 		}
 
 		public override bool IsEventSource

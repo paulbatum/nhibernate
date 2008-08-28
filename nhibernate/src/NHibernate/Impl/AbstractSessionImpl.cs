@@ -128,7 +128,7 @@ namespace NHibernate.Impl
 		public abstract IInterceptor Interceptor { get; }
 		public abstract EventListeners Listeners { get; }
 		public abstract int DontFlushFromFind { get; }
-		public abstract ConnectionManager ConnectionManager { get; }
+		public abstract ConnectionManager ConnectionManager { get; set; }
 		public abstract bool IsEventSource { get; }
 		public abstract object GetEntityUsingInterceptor(EntityKey key);
 		public abstract IPersistenceContext PersistenceContext { get; }
