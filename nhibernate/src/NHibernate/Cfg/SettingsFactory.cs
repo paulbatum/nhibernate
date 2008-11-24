@@ -65,6 +65,10 @@ namespace NHibernate.Cfg
 
 			#endregion
 
+			bool comments = PropertiesHelper.GetBoolean(Environment.UseSqlComments, properties);
+			log.Info("Generate SQL with comments: " + EnabledDisabled(comments));
+			settings.IsCommentsEnabled = comments;
+
 			int maxFetchDepth = PropertiesHelper.GetInt32(Environment.MaxFetchDepth, properties, -1);
 			if (maxFetchDepth != -1)
 			{
@@ -147,7 +151,10 @@ namespace NHibernate.Cfg
 				settings.IsAutoCreateSchema = true;
 				settings.IsAutoDropSchema = true;
 			}
-
+			if ("validate" == autoSchemaExport)
+			{
+				settings.IsAutoValidateSchema = true;
+			}
 			bool useSecondLevelCache = PropertiesHelper.GetBoolean(Environment.UseSecondLevelCache, properties, true);
 			bool useQueryCache = PropertiesHelper.GetBoolean(Environment.UseQueryCache, properties);
 

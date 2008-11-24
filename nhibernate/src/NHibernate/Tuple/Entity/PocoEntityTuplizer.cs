@@ -10,6 +10,7 @@ using NHibernate.Mapping;
 using NHibernate.Properties;
 using NHibernate.Proxy;
 using NHibernate.Type;
+using NHibernate.Util;
 
 namespace NHibernate.Tuple.Entity
 {
@@ -23,6 +24,7 @@ namespace NHibernate.Tuple.Entity
 		private readonly bool isValidatableImplementor;
 		private readonly HashedSet<string> lazyPropertyNames = new HashedSet<string>();
 		private readonly IReflectionOptimizer optimizer;
+		private readonly IProxyValidator proxyValidator;
 
 		public PocoEntityTuplizer(EntityMetamodel entityMetamodel, PersistentClass mappedEntity)
 			: base(entityMetamodel, mappedEntity)
@@ -46,6 +48,8 @@ namespace NHibernate.Tuple.Entity
 			{
 				optimizer = Cfg.Environment.BytecodeProvider.GetReflectionOptimizer(mappedClass, getters, setters);
 			}
+
+			proxyValidator = Cfg.Environment.BytecodeProvider.ProxyFactoryFactory.ProxyValidator;
 		}
 
 		public override System.Type ConcreteProxyClass
@@ -92,8 +96,7 @@ namespace NHibernate.Tuple.Entity
 
 			// determine the id getter and setter methods from the proxy interface (if any)
 			// determine all interfaces needed by the resulting proxy
-			HashedSet<System.Type> proxyInterfaces = new HashedSet<System.Type>();
-			proxyInterfaces.Add(typeof(INHibernateProxy));
+			var proxyInterfaces = new HashedSet<System.Type> {typeof (INHibernateProxy)};
 
 			System.Type _mappedClass = persistentClass.MappedClass;
 			System.Type _proxyInterface = persistentClass.ProxyInterface;
@@ -142,13 +145,11 @@ namespace NHibernate.Tuple.Entity
 			MethodInfo idGetterMethod = idGetter == null ? null : idGetter.Method;
 			MethodInfo idSetterMethod = idSetter == null ? null : idSetter.Method;
 
-			MethodInfo proxyGetIdentifierMethod = idGetterMethod == null || _proxyInterface == null ? null : 
-				idGetterMethod;
-				// TODO H3.2 different behaviour  ReflectHelper.GetMethod(_proxyInterface, idGetterMethod);
+			MethodInfo proxyGetIdentifierMethod = idGetterMethod == null || _proxyInterface == null ? null :
+				ReflectHelper.TryGetMethod(_proxyInterface, idGetterMethod);
 
-			MethodInfo proxySetIdentifierMethod = idSetterMethod == null || _proxyInterface == null ? null : 
-				idSetterMethod;
-				// TODO H3.2 different behaviour ReflectHelper.GetMethod(_proxyInterface, idSetterMethod);
+			MethodInfo proxySetIdentifierMethod = idSetterMethod == null || _proxyInterface == null ? null :
+				ReflectHelper.TryGetMethod(_proxyInterface, idSetterMethod);
 
 			IProxyFactory pf = BuildProxyFactoryInternal(persistentClass, idGetter, idSetter);
 			try
@@ -164,23 +165,26 @@ namespace NHibernate.Tuple.Entity
 			return pf;
 		}
 
-		private static void LogPropertyAccessorsErrors(PersistentClass persistentClass)
+		private void LogPropertyAccessorsErrors(PersistentClass persistentClass)
 		{
-			// This method work when Environment.UseProxyValidator is off
+			if (proxyValidator == null)
+			{
+				return;
+			}
 
+			// This method work when Environment.UseProxyValidator is off
 			System.Type clazz = persistentClass.MappedClass;
 			foreach (Mapping.Property property in persistentClass.PropertyIterator)
 			{
 				MethodInfo method = property.GetGetter(clazz).Method;
-				// In NET if IsVirtual is false or IsFinal is true, then the method cannot be overridden.
-				if (method != null && (!method.IsVirtual || method.IsFinal))
+				if (!proxyValidator.IsProxeable(method))
 				{
 					log.Error(
 						string.Format("Getters of lazy classes cannot be final: {0}.{1}", persistentClass.MappedClass.FullName,
 						              property.Name));
 				}
 				method = property.GetSetter(clazz).Method;
-				if (method != null && (!method.IsVirtual || method.IsFinal))
+				if (!proxyValidator.IsProxeable(method))
 				{
 					log.Error(
 						string.Format("Setters of lazy classes cannot be final: {0}.{1}", persistentClass.MappedClass.FullName,
@@ -284,7 +288,7 @@ namespace NHibernate.Tuple.Entity
 
 		public override EntityMode EntityMode
 		{
-			get { return NHibernate.EntityMode.Poco; }
+			get { return EntityMode.Poco; }
 		}
 	}
 }

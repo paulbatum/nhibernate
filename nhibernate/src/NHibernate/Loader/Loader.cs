@@ -445,6 +445,11 @@ namespace NHibernate.Loader
 					log.Debug(string.Format("done processing result set ({0} rows)", count));
 				}
 			}
+            catch(Exception e)
+            {
+                e.Data["actual-sql-query"] = st.CommandText;
+                throw;
+            }
 			finally
 			{
 				session.Batcher.CloseCommand(st, rs);
@@ -511,7 +516,7 @@ namespace NHibernate.Loader
 						if (rowKeys[i] != null && loadables[i].HasSubselectLoadableCollections)
 						{
 							SubselectFetch subselectFetch =
-								new SubselectFetch(aliases[i], factory.Dialect, loadables[i], queryParameters, keySets[i], namedParameterLocMap);
+								new SubselectFetch(aliases[i], loadables[i], queryParameters, keySets[i], namedParameterLocMap);
 
 							session.PersistenceContext.BatchFetchQueue.AddSubselect(rowKeys[i], subselectFetch);
 						}
@@ -1106,7 +1111,7 @@ namespace NHibernate.Loader
 
 			sqlString = PreprocessSQL(sqlString, queryParameters, dialect);
 
-			// TODO NH: Collable for SP -> PrepareCallableQueryCommand
+			// TODO NH: Callable for SP -> PrepareCallableQueryCommand
 			IDbCommand command =
 				session.Batcher.PrepareQueryCommand(CommandType.Text, sqlString,
 				                                    GetParameterTypes(queryParameters, useLimit, useOffset));
@@ -1342,7 +1347,7 @@ namespace NHibernate.Loader
 			try
 			{
 				log.Info(st.CommandText);
-				// TODO NH: Collable
+				// TODO NH: Callable
 				rs = session.Batcher.ExecuteReader(st);
 				rs = WrapResultSetIfEnabled(rs, session);
 
@@ -1688,10 +1693,10 @@ namespace NHibernate.Loader
 		protected IList DoList(ISessionImplementor session, QueryParameters queryParameters)
 		{
 			bool statsEnabled = Factory.Statistics.IsStatisticsEnabled;
-			var stopWath = new Stopwatch();
+			var stopWatch = new Stopwatch();
 			if (statsEnabled)
 			{
-				stopWath.Start();
+				stopWatch.Start();
 			}
 
 			IList result;
@@ -1711,8 +1716,8 @@ namespace NHibernate.Loader
 			}
 			if (statsEnabled)
 			{
-				stopWath.Stop();
-				Factory.StatisticsImplementor.QueryExecuted(QueryIdentifier, result.Count, stopWath.Elapsed);
+				stopWatch.Stop();
+				Factory.StatisticsImplementor.QueryExecuted(QueryIdentifier, result.Count, stopWatch.Elapsed);
 			}
 			return result;
 		}

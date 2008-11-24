@@ -28,7 +28,7 @@ namespace NHibernate.Test.DialectTest
         {
             SqlString sql = new SqlString("SELECT id, name, email FROM Users");
             SqlString s = dialect.GetLimitString(sql, 5, 10);
-            Assert.AreEqual("SELECT id, name, email FROM Users limit 10, 5", s.ToString());
+            Assert.AreEqual("SELECT id, name, email FROM Users limit 10 offset 5", s.ToString());
         }
 
         [Test]
@@ -39,8 +39,50 @@ namespace NHibernate.Test.DialectTest
             tbl.Name = "`name`";
 
             Assert.AreEqual("\"schema_name\"", tbl.GetQualifiedName(dialect));
-            Assert.AreEqual("\"schema_table\"", dialect.Qualify("","\"schema\"", "\"table\""));
+            Assert.AreEqual("\"schema_table\"", dialect.Qualify("", "\"schema\"", "\"table\""));
         }
+
+        [Test]
+        public void QuotedTableNameWithoutSchemaWithSqlLite()
+        {
+            Table tbl = new Table();
+            tbl.Name = "`name`";
+
+            Assert.AreEqual("\"name\"", tbl.GetQualifiedName(dialect));
+        }
+
+        [Test]
+        public void QuotedSchemaNameWithUnqoutedTableInSqlLite()
+        {
+            Table tbl = new Table();
+            tbl.Schema = "`schema`";
+            tbl.Name = "name";
+
+            Assert.AreEqual("\"schema_name\"", tbl.GetQualifiedName(dialect));
+            Assert.AreEqual("\"schema_table\"", dialect.Qualify("", "\"schema\"", "table"));
+        }
+
+        [Test]
+        public void QuotedCatalogSchemaNameWithSqlLite()
+        {
+            Table tbl = new Table();
+            tbl.Catalog = "dbo";
+            tbl.Schema = "`schema`";
+            tbl.Name = "`name`";
+
+            Assert.AreEqual("\"dbo_schema_name\"", tbl.GetQualifiedName(dialect));
+            Assert.AreEqual("\"dbo_schema_table\"", dialect.Qualify("dbo", "\"schema\"", "\"table\""));
+        }
+
+        [Test]
+        public void QuotedTableNameWithSqlLite()
+        {
+            Table tbl = new Table();
+            tbl.Name = "`Group`";
+
+            Assert.AreEqual("\"Group\"", tbl.GetQualifiedName(dialect));
+        }
+
 
         [Test]
         public void SchemaNameWithSqlLite()
@@ -50,7 +92,7 @@ namespace NHibernate.Test.DialectTest
             tbl.Name = "name";
 
             Assert.AreEqual("schema_name", tbl.GetQualifiedName(dialect));
-            Assert.AreEqual("schema_table", dialect.Qualify("","schema","table"));
+            Assert.AreEqual("schema_table", dialect.Qualify("", "schema", "table"));
         }
     }
 }

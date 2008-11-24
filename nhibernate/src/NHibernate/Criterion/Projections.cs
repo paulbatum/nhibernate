@@ -253,6 +253,16 @@ namespace NHibernate.Criterion
 			return new ConstantProjection(obj);
 		}
 
+		/// <summary>
+		/// Return a constant value
+		/// </summary>
+		/// <param name="obj">The obj.</param>
+		/// <param name="type"></param>
+		/// <returns></returns>
+		public static IProjection Constant(object obj, IType type)
+		{
+			return new ConstantProjection(obj,type);
+		}
 
 
 		/// <summary>

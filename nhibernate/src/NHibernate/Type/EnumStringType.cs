@@ -2,7 +2,6 @@ using System;
 using System.Data;
 using NHibernate.Engine;
 using NHibernate.SqlTypes;
-using NHibernate.Util;
 
 namespace NHibernate.Type
 {
@@ -62,10 +61,8 @@ namespace NHibernate.Type
 	/// </para>
 	/// </remarks>
 	[Serializable]
-	public abstract class EnumStringType : ImmutableType, IDiscriminatorType
+	public abstract class EnumStringType : AbstractEnumType
 	{
-		private readonly System.Type enumClass;
-
 		/// <summary>
 		/// Hardcoding of <c>255</c> for the maximum length
 		/// of the Enum name that will be saved to the db.
@@ -80,27 +77,27 @@ namespace NHibernate.Type
 		/// Initializes a new instance of <see cref="EnumStringType"/>.
 		/// </summary>
 		/// <param name="enumClass">The <see cref="System.Type"/> of the Enum.</param>
-		protected EnumStringType(System.Type enumClass)
-			: this(enumClass, MaxLengthForEnumString)
-		{
-		}
+		protected EnumStringType(System.Type enumClass) : this(enumClass, MaxLengthForEnumString) {}
 
 		/// <summary>
 		/// Initializes a new instance of <see cref="EnumStringType"/>.
 		/// </summary>
 		/// <param name="enumClass">The <see cref="System.Type"/> of the Enum.</param>
 		/// <param name="length">The length of the string that can be written to the column.</param>
-		protected EnumStringType(System.Type enumClass, int length)
-			: base(SqlTypeFactory.GetString(length))
+		protected EnumStringType(System.Type enumClass, int length) : base(SqlTypeFactory.GetString(length), enumClass) {}
+
+		/// <summary>
+		/// 
+		/// </summary>
+		/// <remarks>
+		/// This appends <c>enumstring - </c> to the beginning of the underlying
+		/// enums name so that <see cref="System.Enum"/> could still be stored
+		/// using the underlying value through the <see cref="PersistentEnumType"/>
+		/// also.
+		/// </remarks>
+		public override string Name
 		{
-			if (enumClass.IsEnum)
-			{
-				this.enumClass = enumClass;
-			}
-			else
-			{
-				throw new MappingException(enumClass.Name + " did not inherit from System.Enum");
-			}
+			get { return "enumstring - " + ReturnedClass.Name; }
 		}
 
 		/// <summary>
@@ -113,11 +110,11 @@ namespace NHibernate.Type
 			//code is an named constants defined for the enumeration.
 			try
 			{
-				return Enum.Parse(enumClass, code as string, true);
+				return StringToObject(code as string);
 			}
 			catch (ArgumentException ae)
 			{
-				throw new HibernateException(string.Format("Can't Parse {0} as {1}", code, enumClass.Name), ae);
+				throw new HibernateException(string.Format("Can't Parse {0} as {1}", code, ReturnedClass.Name), ae);
 			}
 		}
 
@@ -135,27 +132,19 @@ namespace NHibernate.Type
 		/// <summary>
 		/// 
 		/// </summary>
-		public override System.Type ReturnedClass
-		{
-			get { return enumClass; }
-		}
-
-		/// <summary>
-		/// 
-		/// </summary>
 		/// <param name="cmd"></param>
 		/// <param name="value"></param>
 		/// <param name="index"></param>
 		public override void Set(IDbCommand cmd, object value, int index)
 		{
-			IDataParameter par = (IDataParameter) cmd.Parameters[index];
+			var par = (IDataParameter) cmd.Parameters[index];
 			if (value == null)
 			{
 				par.Value = DBNull.Value;
 			}
 			else
 			{
-				par.Value = Enum.Format(this.enumClass, value, "G");
+				par.Value = Enum.Format(ReturnedClass, value, "G");
 			}
 		}
 
@@ -192,20 +181,6 @@ namespace NHibernate.Type
 		/// <summary>
 		/// 
 		/// </summary>
-		/// <remarks>
-		/// This appends <c>enumstring - </c> to the beginning of the underlying
-		/// enums name so that <see cref="System.Enum"/> could still be stored
-		/// using the underlying value through the <see cref="PersistentEnumType"/>
-		/// also.
-		/// </remarks>
-		public override string Name
-		{
-			get { return "enumstring - " + enumClass.Name; }
-		}
-
-		/// <summary>
-		/// 
-		/// </summary>
 		/// <param name="value"></param>
 		/// <returns></returns>
 		public override string ToString(object value)
@@ -237,24 +212,15 @@ namespace NHibernate.Type
 			return (value == null) ? null : GetValue(value);
 		}
 
-		/// <summary>
-		/// 
-		/// </summary>
-		/// <param name="xml"></param>
-		/// <returns></returns>
-		public object StringToObject(string xml)
-		{
-			return (string.IsNullOrEmpty(xml)) ? null : FromStringValue(xml);
-		}
-
-		public override object FromStringValue(string xml)
-		{
-			return GetInstance(xml);
-		}
-
-		public string ObjectToSQLString(object value, Dialect.Dialect dialect)
+		public override string ObjectToSQLString(object value, Dialect.Dialect dialect)
 		{
 			return GetValue(value).ToString();
 		}
+	}
+
+	[Serializable]
+	public class EnumStringType<T> : EnumStringType
+	{
+		public EnumStringType() : base(typeof (T)) {}
 	}
 }

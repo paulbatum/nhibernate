@@ -8,13 +8,9 @@ using NHibernate.Util;
 
 namespace NHibernate.Exceptions
 {
-	public sealed class ADOExceptionHelper
+	public static class ADOExceptionHelper
 	{
 		public const string SQLNotAvailable = "SQL not available";
-
-		private ADOExceptionHelper()
-		{
-		}
 
 		/// <summary> 
 		/// Converts the given SQLException into NHibernate's ADOException hierarchy, as well as performing
@@ -25,8 +21,10 @@ namespace NHibernate.Exceptions
 		/// <param name="message">An optional error message.</param>
 		/// <param name="sql">The SQL executed.</param>
 		/// <returns> The converted <see cref="ADOException"/>.</returns>
-		public static ADOException Convert(ISQLExceptionConverter converter, Exception sqlException, string message, SqlString sql)
+		public static ADOException Convert(ISQLExceptionConverter converter, Exception sqlException, string message,
+		                                   SqlString sql)
 		{
+			sql = TryGetActualSqlQuery(sqlException, sql);
 			ADOExceptionReporter.LogExceptions(sqlException, ExtendMessage(message, sql, null, null));
 			return converter.Convert(sqlException, message, sql);
 		}
@@ -41,12 +39,15 @@ namespace NHibernate.Exceptions
 		/// <returns> The converted <see cref="ADOException"/>.</returns>
 		public static ADOException Convert(ISQLExceptionConverter converter, Exception sqlException, string message)
 		{
-			return Convert(converter, sqlException, message, new SqlString(SQLNotAvailable));
+			var sql = new SqlString(SQLNotAvailable);
+			sql = TryGetActualSqlQuery(sqlException, sql);
+			return Convert(converter, sqlException, message, sql);
 		}
 
 		public static ADOException Convert(ISQLExceptionConverter converter, Exception sqle, string message, SqlString sql,
-			object[] parameterValues, IDictionary<string, TypedValue> namedParameters)
+		                                   object[] parameterValues, IDictionary<string, TypedValue> namedParameters)
 		{
+			sql = TryGetActualSqlQuery(sqle, sql);
 			string extendMessage = ExtendMessage(message, sql, parameterValues, namedParameters);
 			ADOExceptionReporter.LogExceptions(sqle, extendMessage);
 			return new ADOException(extendMessage, sqle, sql);
@@ -58,7 +59,7 @@ namespace NHibernate.Exceptions
 		public static DbException ExtractDbException(Exception sqlException)
 		{
 			Exception baseException = sqlException;
-			DbException result = sqlException as DbException;
+			var result = sqlException as DbException;
 			while (result == null && baseException != null)
 			{
 				baseException = baseException.InnerException;
@@ -67,38 +68,41 @@ namespace NHibernate.Exceptions
 			return result;
 		}
 
-		public static string ExtendMessage(string message, SqlString sql, object[] parameterValues, IDictionary<string, TypedValue> namedParameters)
+		public static string ExtendMessage(string message, SqlString sql, object[] parameterValues,
+		                                   IDictionary<string, TypedValue> namedParameters)
 		{
-			StringBuilder sb = new StringBuilder();
-			sb.Append(message).Append(Environment.NewLine).
-				Append("[ ").Append(sql).Append(" ]");
+			var sb = new StringBuilder();
+			sb.Append(message).Append(Environment.NewLine).Append("[ ").Append(sql).Append(" ]");
 			if (parameterValues != null && parameterValues.Length > 0)
 			{
 				sb.Append(Environment.NewLine).Append("Positional parameters: ");
-				int index = 0;
-				foreach (object parameterValue in parameterValues)
+				for (int index = 0; index < parameterValues.Length; index++)
 				{
-					object value = parameterValue;
-					if (value == null)
-						value = "null";
+					object value = parameterValues[index] ?? "null";
 					sb.Append(" #").Append(index).Append(">").Append(value);
 				}
 			}
 			if (namedParameters != null && namedParameters.Count > 0)
 			{
 				sb.Append(Environment.NewLine);
-				foreach (KeyValuePair<string, TypedValue> namedParameter in namedParameters)
+				foreach (var namedParameter in namedParameters)
 				{
-					object value = namedParameter.Value.Value;
-					if (value == null)
-						value = "null";
-					sb.Append("  ").Append("Name:").Append(namedParameter.Key)
-						.Append(" - Value:").Append(value);
-
+					object value = namedParameter.Value.Value ?? "null";
+					sb.Append("  ").Append("Name:").Append(namedParameter.Key).Append(" - Value:").Append(value);
 				}
 			}
 			sb.Append(Environment.NewLine);
 			return sb.ToString();
+		}
+
+		public static SqlString TryGetActualSqlQuery(Exception sqle, SqlString sql)
+		{
+			var query = (string) sqle.Data["actual-sql-query"];
+			if (query != null)
+			{
+				sql = new SqlString(query);
+			}
+			return sql;
 		}
 	}
 }

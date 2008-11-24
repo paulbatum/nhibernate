@@ -160,8 +160,8 @@ namespace NHibernate.Persister.Collection
 
 		private readonly string[] spaces;
 
-		private readonly IDictionary collectionPropertyColumnAliases = new Hashtable();
-		private readonly IDictionary collectionPropertyColumnNames = new Hashtable();
+		private readonly IDictionary<string, object> collectionPropertyColumnAliases = new Dictionary<string, object>();
+		private readonly IDictionary<string, object> collectionPropertyColumnNames = new Dictionary<string, object>();
 
 		private static readonly ILog log = LogManager.GetLogger(typeof (ICollectionPersister));
 
@@ -1445,7 +1445,7 @@ namespace NHibernate.Persister.Collection
 				{
 					KeyType.NullSafeSet(st, key, 0, session);
 					rs = session.Batcher.ExecuteReader(st);
-					return rs.Read() ? rs.GetInt32(0) - baseIndex : 0;
+					return rs.Read() ? Convert.ToInt32(rs.GetValue(0)) - baseIndex : 0;
 				}
 				finally
 				{
@@ -1866,7 +1866,7 @@ namespace NHibernate.Persister.Collection
 		public abstract bool IsOneToMany { get; }
 
 		protected object PerformInsert(object ownerId, IPersistentCollection collection, IExpectation expectation,
-		                               object entry, int index, bool useBatch, bool collable, ISessionImplementor session)
+		                               object entry, int index, bool useBatch, bool callable, ISessionImplementor session)
 		{
 			object entryId = null;
 			int offset = 0;

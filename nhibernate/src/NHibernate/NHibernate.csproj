@@ -40,14 +40,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Castle.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\lib\net\2.0\Castle.Core.dll</HintPath>
-    </Reference>
-    <Reference Include="Castle.DynamicProxy2, Version=2.0.0.1, Culture=neutral, PublicKeyToken=407dd0808d44fbdc, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\lib\net\2.0\Castle.DynamicProxy2.dll</HintPath>
-    </Reference>
     <Reference Include="Iesi.Collections, Version=1.0.0.1, Culture=neutral, PublicKeyToken=154fdcb44c4484fc">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\lib\net\2.0\Iesi.Collections.dll</HintPath>
@@ -297,13 +289,11 @@
     <Compile Include="Properties\PascalCaseMUnderscoreStrategy.cs" />
     <Compile Include="Properties\PascalCaseUnderscoreStrategy.cs" />
     <Compile Include="Properties\PropertyAccessorFactory.cs" />
-    <Compile Include="Proxy\Poco\Castle\CastleLazyInitializer.cs" />
-    <Compile Include="Proxy\Poco\Castle\CastleProxyFactory.cs" />
     <Compile Include="Proxy\INHibernateProxy.cs" />
     <Compile Include="Proxy\IProxyFactory.cs" />
     <Compile Include="Proxy\AbstractLazyInitializer.cs" />
     <Compile Include="Proxy\NHibernateProxyHelper.cs" />
-    <Compile Include="Proxy\ProxyTypeValidator.cs" />
+    <Compile Include="Proxy\DynProxyTypeValidator.cs" />
     <Compile Include="QueryException.cs" />
     <Compile Include="ReplicationMode.cs" />
     <Compile Include="SqlCommand\Alias.cs" />
@@ -450,9 +440,16 @@
     <Compile Include="AdoNet\ResultSetWrapper.cs" />
     <Compile Include="AdoNet\SqlClientBatchingBatcherFactory.cs" />
     <Compile Include="AdoNet\TooManyRowsAffectedException.cs" />
+    <Compile Include="Bytecode\HibernateByteCodeException.cs" />
+    <Compile Include="Bytecode\ProxyFactoryFactoryNotConfiguredException.cs" />
+    <Compile Include="Bytecode\UnableToLoadProxyFactoryFactoryException.cs" />
+    <Compile Include="Dialect\Schema\SQLiteMetaData.cs" />
+    <Compile Include="Dialect\Schema\SybaseAnywhereMetaData.cs" />
+    <Compile Include="Dialect\SybaseASA10Dialect.cs" />
+    <Compile Include="Dialect\SybaseASA9Dialect.cs" />
+    <Compile Include="Id\SelectGenerator.cs" />
     <Compile Include="Properties\BackFieldStrategy.cs" />
     <Compile Include="Bytecode\CodeDom\BytecodeProviderImpl.cs" />
-    <Compile Include="Bytecode\DefaultProxyFactoryFactory.cs" />
     <Compile Include="Bytecode\IAccessOptimizer.cs" />
     <Compile Include="Bytecode\IBytecodeProvider.cs" />
     <Compile Include="Bytecode\IInjectableProxyFactoryFactory.cs" />
@@ -830,6 +827,7 @@
     <Compile Include="Properties\IndexPropertyAccessor.cs" />
     <Compile Include="Properties\MapAccessor.cs" />
     <Compile Include="Properties\NoopAccessor.cs" />
+    <Compile Include="Proxy\IProxyValidator.cs" />
     <Compile Include="Proxy\IEntityNotFoundDelegate.cs" />
     <Compile Include="Proxy\ILazyInitializer.cs" />
     <Compile Include="Proxy\Map\MapLazyInitializer.cs" />
@@ -1022,6 +1020,7 @@
     <Compile Include="Tool\hbm2ddl\ManagedProviderConnectionHelper.cs" />
     <Compile Include="Dialect\Schema\AbstractDataBaseSchema.cs" />
     <Compile Include="Tool\hbm2ddl\SchemaUpdate.cs" />
+    <Compile Include="Tool\hbm2ddl\SchemaValidator.cs" />
     <Compile Include="Tool\hbm2ddl\SuppliedConnectionHelper.cs" />
     <Compile Include="Tool\hbm2ddl\SuppliedConnectionProviderConnectionHelper.cs" />
     <Compile Include="Transaction\AdoNetTransactionFactory.cs" />
@@ -1054,7 +1053,8 @@
     <Compile Include="Tuple\StandardProperty.cs" />
     <Compile Include="Tuple\VersionProperty.cs" />
     <Compile Include="TypeMismatchException.cs" />
-    <Compile Include="Type\AbstractBynaryType.cs" />
+    <Compile Include="Type\AbstractBinaryType.cs" />
+    <Compile Include="Type\AbstractEnumType.cs" />
     <Compile Include="Type\AbstractStringType.cs" />
     <Compile Include="Type\AnsiCharType.cs" />
     <Compile Include="Type\AnyType.cs" />
@@ -1063,6 +1063,7 @@
     <Compile Include="Type\CollectionType.cs" />
     <Compile Include="Type\CustomCollectionType.cs" />
     <Compile Include="Type\EmbeddedComponentType.cs" />
+    <Compile Include="Type\EnumCharType.cs" />
     <Compile Include="Type\GenericOrderedSetType.cs" />
     <Compile Include="Type\ICacheAssembler.cs" />
     <Compile Include="Type\OrderedSetType.cs" />
@@ -1109,6 +1110,7 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Util\XmlHelper.cs" />
+    <Compile Include="Properties\XmlAccessor.cs" />
     <EmbeddedResource Include="nhibernate-configuration.xsd">
       <SubType>Designer</SubType>
     </EmbeddedResource>

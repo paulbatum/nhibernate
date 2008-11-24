@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 
 namespace NHibernate.Test.GenericTest.Overall
@@ -9,26 +8,17 @@ namespace NHibernate.Test.GenericTest.Overall
 	/// </summary>
 	public class A<T>
 	{
-		private int? id;
-		private IList<T> collection;
-		private T property;
+		public virtual int? Id { get; set; }
 
-		public virtual int? Id
-		{
-			get { return id; }
-			set { id = value; }
-		}
+		public virtual T Property { get; set; }
 
-		public virtual T Property
-		{
-			get { return property; }
-			set { property = value; }
-		}
+		public virtual IList<T> Collection { get; set; }
+	}
 
-		public virtual IList<T> Collection
-		{
-			get { return collection; }
-			set { collection = value; }
-		}
+	public class B
+	{
+		public virtual int? Id { get; set; }
+
+		public virtual int Prop { get; set; }
 	}
 }

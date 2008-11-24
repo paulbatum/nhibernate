@@ -3,6 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 10.00
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{593DCEA7-C933-46F3-939F-D8172399AB05}"
 	ProjectSection(SolutionItems) = preProject
 		..\default.build = ..\default.build
+		..\releasenotes.txt = ..\releasenotes.txt
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NHibernate", "NHibernate\NHibernate.csproj", "{5909BFE7-93CF-4E5F-BE22-6293368AF01D}"
@@ -10,6 +11,10 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NHibernate.DomainModel", "NHibernate.DomainModel\NHibernate.DomainModel.csproj", "{5C649B55-1B3F-4C38-9998-1B043E94A244}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NHibernate.Test", "NHibernate.Test\NHibernate.Test.csproj", "{7AEE5B37-C552-4E59-9B6F-88755BCB5070}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NHibernate.ByteCode.LinFu", "NHibernate.ByteCode.LinFu\NHibernate.ByteCode.LinFu.csproj", "{8289D6AD-9714-42D3-A94D-D4D9814D1281}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NHibernate.ByteCode.LinFu.Tests", "NHibernate.ByteCode.LinFu.Tests\NHibernate.ByteCode.LinFu.Tests.csproj", "{94FDD99B-8275-4E51-8F43-958B2C632120}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,6 +34,14 @@ Global
 		{7AEE5B37-C552-4E59-9B6F-88755BCB5070}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7AEE5B37-C552-4E59-9B6F-88755BCB5070}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7AEE5B37-C552-4E59-9B6F-88755BCB5070}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8289D6AD-9714-42D3-A94D-D4D9814D1281}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8289D6AD-9714-42D3-A94D-D4D9814D1281}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8289D6AD-9714-42D3-A94D-D4D9814D1281}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8289D6AD-9714-42D3-A94D-D4D9814D1281}.Release|Any CPU.Build.0 = Release|Any CPU
+		{94FDD99B-8275-4E51-8F43-958B2C632120}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{94FDD99B-8275-4E51-8F43-958B2C632120}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{94FDD99B-8275-4E51-8F43-958B2C632120}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{94FDD99B-8275-4E51-8F43-958B2C632120}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
