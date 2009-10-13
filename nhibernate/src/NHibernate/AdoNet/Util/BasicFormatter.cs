@@ -357,13 +357,17 @@ namespace NHibernate.AdoNet.Util
 				if (parensSinceSelect < 0)
 				{
 					indent--;
-					int tempObject = parenCounts[parenCounts.Count - 1];
-					parenCounts.RemoveAt(parenCounts.Count - 1);
-					parensSinceSelect = tempObject;
 
-					bool tempObject2 = afterByOrFromOrSelects[afterByOrFromOrSelects.Count - 1];
-					afterByOrFromOrSelects.RemoveAt(afterByOrFromOrSelects.Count - 1);
-					afterByOrSetOrFromOrSelect = tempObject2;
+					if (parenCounts.Count > 0)
+					{
+						int tempObject = parenCounts[parenCounts.Count - 1];
+						parenCounts.RemoveAt(parenCounts.Count - 1);
+						parensSinceSelect = tempObject;
+
+						bool tempObject2 = afterByOrFromOrSelects[afterByOrFromOrSelects.Count - 1];
+						afterByOrFromOrSelects.RemoveAt(afterByOrFromOrSelects.Count - 1);
+						afterByOrSetOrFromOrSelect = tempObject2;
+					}					
 				}
 				if (inFunction > 0)
 				{
