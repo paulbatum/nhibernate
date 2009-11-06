@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Data;
+using System.Linq;
 using System.Linq.Expressions;
 using NHibernate.Engine;
 using NHibernate.Stat;
@@ -783,6 +784,13 @@ namespace NHibernate
 		/// <returns>An ICriteria object</returns>
 		ICriteria CreateCriteria(string entityName, string alias);
 
+		/// <summary>
+		/// NHLinq
+		/// </summary>
+		/// <typeparam name="T"></typeparam>
+		/// <returns></returns>
+		IQueryable<T> Query<T>();
+		
 		/// <summary>
 		/// Creates a new <c>IQueryOver&lt;T&gt;</c> for the entity class.
 		/// </summary>

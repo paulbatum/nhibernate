@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
+using System.Linq;
 using System.Linq.Expressions;
 using System.Runtime.Serialization;
 using System.Security.Permissions;
@@ -15,6 +16,7 @@ using NHibernate.Engine.Query;
 using NHibernate.Engine.Query.Sql;
 using NHibernate.Event;
 using NHibernate.Hql;
+using NHibernate.Linq;
 using NHibernate.Loader.Criteria;
 using NHibernate.Loader.Custom;
 using NHibernate.Loader.Custom.Sql;
@@ -1907,6 +1909,11 @@ namespace NHibernate.Impl
 				CheckAndUpdateSessionStatus();
 				return new CriteriaImpl(entityName, alias, this);
 			}
+		}
+
+		public IQueryable<T> Query<T>()
+		{
+			return new NhQueryable<T>(this);
 		}
 
 		public ICriteria CreateCriteria(string entityName)
